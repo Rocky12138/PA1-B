@@ -10,6 +10,11 @@ import java.util.Map;
 import java.util.Set;
 
 public class Parser extends Table {
+	/**
+	 *	check for syntax error.
+	 */
+	private boolean check = true;
+
     /**
      * Lexer.
      */
@@ -81,24 +86,60 @@ public class Parser extends Table {
      * @return the parsed value of `symbol` if parsing succeeded, otherwise `null`.
      */
     private SemValue parse(int symbol, Set<Integer> follow) {
+		//System.out.print("checking for "+name(symbol));
+
+		//establish EndSym set
+		Set<Integer> endSym = new HashSet<Integer>();
+		endSym.addAll(follow);
+		endSym.addAll(followSet(symbol));
+
+		//check if lookahead is in beginSet
         Map.Entry<Integer, List<Integer>> result = query(symbol, lookahead); // get production by lookahead symbol
-        int actionId = result.getKey(); // get user-defined action
+		if (result==null) {	//lookahead not in beginSet
+			//release error
+			error();
+			//skip
+			while (result==null && !endSym.contains(lookahead)) {
+				//skip all the symbols here
+				lookahead = lex();
+				result = query(symbol, lookahead);
+			}
+		}	//while out, lookahead is in begin+end set
 
-        List<Integer> right = result.getValue(); // right-hand side of production
-        int length = right.size();
-        SemValue[] params = new SemValue[length + 1];
+		while (result!=null) {	//if lookahead is in beginSet
+			/*System.out.print(name(symbol)+"->");
+			printSymbolList(result.getValue());
+			System.out.println();*/
 
-        for (int i = 0; i < length; i++) { // parse right-hand side symbols one by one
-            int term = right.get(i);
-            params[i + 1] = isNonTerminal(term)
-                    ? parse(term, follow) // for non terminals: recursively parse it
-                    : matchToken(term) // for terminals: match token
-                    ;
-        }
+			int actionId = result.getKey(); // get user-defined action
 
-        params[0] = new SemValue(); // initialize return value
-        act(actionId, params); // do user-defined action
-        return params[0];
+			List<Integer> right = result.getValue(); // right-hand side of production
+			int length = right.size();
+			SemValue[] params = new SemValue[length + 1];
+
+			//match all the right symbols
+			for (int i = 0; i < length; i++) { // parse right-hand side symbols one by one
+				int term = right.get(i);
+				params[i + 1] = isNonTerminal(term)
+						? parse(term, endSym) // for non terminals: recursively parse it
+						: matchToken(term) // for terminals: match token
+						;
+				if (check && params[i + 1] == null) {
+					check = false;
+				}
+			}
+
+			//System.out.println("actionId "+actionId);
+			if (check) {
+				params[0] = new SemValue(); // initialize return value
+				act(actionId, params); // do user-defined action
+				return params[0];
+			}
+			return null;
+		}
+
+		//lookahead is in endSym, failed
+		return null;
     }
 
     /**
@@ -110,6 +151,7 @@ public class Parser extends Table {
     private SemValue matchToken(int expected) {
         SemValue self = val;
         if (lookahead != expected) {
+			//NOTICE: here no lookahead update, no consumption
             error();
             return null;
         }

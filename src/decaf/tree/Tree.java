@@ -506,7 +506,7 @@ public abstract class Tree {
 				pw.decIndent();
 				return;
 			}
-			for (int i = 0; i < len; ++i) {
+			for (int i = len-1; i >= 0; --i) {
 				pw.println("guard");
 				pw.incIndent();
 				exprList.get(i).printTo(pw);
@@ -543,36 +543,39 @@ public abstract class Tree {
         }
     }
 
+	//modified for sealed syntax
     public static class ClassDef extends Tree {
+    	
+		public boolean sealed;
+    	public String name;
+    	public String parent;
+    	public List<Tree> fields;
 
-        public String name;
-        public String parent;
-        public List<Tree> fields;
-
-        public ClassDef(String name, String parent, List<Tree> fields,
-                        Location loc) {
-            super(CLASSDEF, loc);
-            this.name = name;
-            this.parent = parent;
-            this.fields = fields;
+        public ClassDef(boolean sealed, String name, String parent, List<Tree> fields,
+    			Location loc) {
+    		super(CLASSDEF, loc);
+    		this.name = name;
+    		this.parent = parent;
+    		this.fields = fields;
+			this.sealed = sealed;
         }
 
-        @Override
+    	@Override
         public void accept(Visitor v) {
             v.visitClassDef(this);
         }
-
-        @Override
-        public void printTo(IndentPrintWriter pw) {
-            pw.println("class " + name + " "
-                    + (parent != null ? parent : "<empty>"));
-            pw.incIndent();
-            for (Tree f : fields) {
-                f.printTo(pw);
-            }
-            pw.decIndent();
-        }
-    }
+        
+    	@Override
+    	public void printTo(IndentPrintWriter pw) {
+    		pw.println((sealed?"sealed class ":"class ") + name + " "
+    				+ (parent != null ? parent : "<empty>"));
+    		pw.incIndent();
+    		for (Tree f : fields) {
+    			f.printTo(pw);
+    		}
+    		pw.decIndent();
+    	}
+   }
 
     public static class MethodDef extends Tree {
 
@@ -1114,76 +1117,88 @@ public abstract class Tree {
     }
 
     /**
-     * A binary operation.
-     */
+      * A binary operation.
+      */
     public static class Binary extends Expr {
 
-        public Expr left;
-        public Expr right;
+    	public Expr left;
+    	public Expr right;
 
         public Binary(int kind, Expr left, Expr right, Location loc) {
             super(kind, loc);
-            this.left = left;
-            this.right = right;
+    		this.left = left;
+    		this.right = right;
         }
 
-        private void binaryOperatorPrintTo(IndentPrintWriter pw, String op) {
-            pw.println(op);
-            pw.incIndent();
-            left.printTo(pw);
-            right.printTo(pw);
-            pw.decIndent();
-        }
+    	private void binaryOperatorPrintTo(IndentPrintWriter pw, String op) {
+    		pw.println(op);
+    		pw.incIndent();
+    		left.printTo(pw);
+    		right.printTo(pw);
+    		pw.decIndent();
+    	}
 
-        @Override
-        public void accept(Visitor visitor) {
-            visitor.visitBinary(this);
-        }
+    	@Override
+    	public void accept(Visitor visitor) {
+    		visitor.visitBinary(this);
+    	}
 
-        @Override
-        public void printTo(IndentPrintWriter pw) {
-            switch (tag) {
-                case PLUS:
-                    binaryOperatorPrintTo(pw, "add");
-                    break;
-                case MINUS:
-                    binaryOperatorPrintTo(pw, "sub");
-                    break;
-                case MUL:
-                    binaryOperatorPrintTo(pw, "mul");
-                    break;
-                case DIV:
-                    binaryOperatorPrintTo(pw, "div");
-                    break;
-                case MOD:
-                    binaryOperatorPrintTo(pw, "mod");
-                    break;
-                case AND:
-                    binaryOperatorPrintTo(pw, "and");
-                    break;
-                case OR:
-                    binaryOperatorPrintTo(pw, "or");
-                    break;
-                case EQ:
-                    binaryOperatorPrintTo(pw, "equ");
-                    break;
-                case NE:
-                    binaryOperatorPrintTo(pw, "neq");
-                    break;
-                case LT:
-                    binaryOperatorPrintTo(pw, "les");
-                    break;
-                case LE:
-                    binaryOperatorPrintTo(pw, "leq");
-                    break;
-                case GT:
-                    binaryOperatorPrintTo(pw, "gtr");
-                    break;
-                case GE:
-                    binaryOperatorPrintTo(pw, "geq");
-                    break;
-            }
-        }
+    	@Override
+    	public void printTo(IndentPrintWriter pw) {
+    		switch (tag) {
+			case ARRAYREF:
+				binaryOperatorPrintTo(pw, "arrref");
+				break;
+			case RANGE:
+				binaryOperatorPrintTo(pw, "range");
+				break;
+			case AINIT:
+				binaryOperatorPrintTo(pw, "array repeat");
+				break;
+			case CONCAT:
+				binaryOperatorPrintTo(pw, "array concat");
+				break;
+    		case PLUS:
+    			binaryOperatorPrintTo(pw, "add");
+    			break;
+    		case MINUS:
+    			binaryOperatorPrintTo(pw, "sub");
+    			break;
+    		case MUL:
+    			binaryOperatorPrintTo(pw, "mul");
+    			break;
+    		case DIV:
+    			binaryOperatorPrintTo(pw, "div");
+    			break;
+    		case MOD:
+    			binaryOperatorPrintTo(pw, "mod");
+    			break;
+    		case AND:
+    			binaryOperatorPrintTo(pw, "and");
+    			break;
+    		case OR:
+    			binaryOperatorPrintTo(pw, "or");
+    			break;
+    		case EQ:
+    			binaryOperatorPrintTo(pw, "equ");
+    			break;
+    		case NE:
+    			binaryOperatorPrintTo(pw, "neq");
+    			break;
+    		case LT:
+    			binaryOperatorPrintTo(pw, "les");
+    			break;
+    		case LE:
+    			binaryOperatorPrintTo(pw, "leq");
+    			break;
+    		case GT:
+    			binaryOperatorPrintTo(pw, "gtr");
+    			break;
+    		case GE:
+    			binaryOperatorPrintTo(pw, "geq");
+    			break;
+    		}
+    	}
     }
 
 	/**
@@ -1437,15 +1452,17 @@ public abstract class Tree {
         }
     }
 
-    /**
-     * A constant value given literally.
-     *
-     * @param value value representation
-     */
+        /**
+      * A constant value given literally.
+      * @param value value representation
+      */
     public static class Literal extends Expr {
 
-        public int typeTag;
+    	public int typeTag;
         public Object value;
+
+		//for array const syntax
+		public List<Expr> constList;
 
         public Literal(int typeTag, Object value, Location loc) {
             super(LITERAL, loc);
@@ -1453,24 +1470,45 @@ public abstract class Tree {
             this.value = value;
         }
 
-        @Override
+		//Override construtor for array const syntax
+		public Literal(int typeTag, List<Expr> constList, Location loc) {
+            super(LITERAL, loc);
+            this.typeTag = typeTag;
+            this.constList = constList;
+        }
+
+    	@Override
         public void accept(Visitor v) {
             v.visitLiteral(this);
         }
 
-        @Override
-        public void printTo(IndentPrintWriter pw) {
-            switch (typeTag) {
-                case INT:
-                    pw.println("intconst " + value);
-                    break;
-                case BOOL:
-                    pw.println("boolconst " + value);
-                    break;
-                default:
-                    pw.println("stringconst " + MiscUtils.quote((String) value));
-            }
-        }
+    	@Override
+    	public void printTo(IndentPrintWriter pw) {
+    		switch (typeTag) {
+    		case INT:
+    			pw.println("intconst " + value);
+    			break;
+    		case BOOL:
+    			pw.println("boolconst " + value);
+    			break;
+			case ARRAYCONST:
+				pw.println("array const");
+				pw.incIndent();
+				int size = constList.size();
+				if (size == 0) {
+					pw.println("<empty>");
+					pw.decIndent();
+					return;
+				}
+				for (int i = size-1; i >= 0; --i) {
+					constList.get(i).printTo(pw);
+				}
+				pw.decIndent();
+				break;
+    		default:
+    			pw.println("stringconst " + MiscUtils.quote((String)value));
+    		}
+    	}
     }
 
     public static class Null extends Expr {
@@ -1587,6 +1625,10 @@ public abstract class Tree {
         public Visitor() {
             super();
         }
+
+		public void visitScopy(Scopy that) {
+			visitTree(that);
+		}
 
 		public void visitForeach(ForeachLoop that) {
 			visitTree(that);

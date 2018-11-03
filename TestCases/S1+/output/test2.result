@@ -1,0 +1,176 @@
+2018-11-04 03:33:09
+Full thread dump Java HotSpot(TM) 64-Bit Server VM (10.0.2+13 mixed mode):
+
+Threads class SMR info:
+_java_thread_list=0x00000230ccd29430, length=10, elements={
+0x00000230b16a6000, 0x00000230ccb29800, 0x00000230ccb36000, 0x00000230ccb8d800,
+0x00000230ccb90800, 0x00000230ccb91800, 0x00000230ccbf4800, 0x00000230ccbf8000,
+0x00000230ccd67800, 0x00000230ccd11000
+}
+
+"main" #1 prio=5 os_prio=0 tid=0x00000230b16a6000 nid=0x131c runnable  [0x000000c6ce4fe000]
+   java.lang.Thread.State: RUNNABLE
+	at java.lang.String.length(java.base@10.0.2/Unknown Source)
+	at java.lang.String.getChars(java.base@10.0.2/Unknown Source)
+	at sun.nio.cs.StreamEncoder.write(java.base@10.0.2/Unknown Source)
+	at java.io.OutputStreamWriter.write(java.base@10.0.2/Unknown Source)
+	at java.io.PrintWriter.write(java.base@10.0.2/Unknown Source)
+	- locked <0x00000000c5396240> (a java.io.OutputStreamWriter)
+	at decaf.utils.IndentPrintWriter.write(IndentPrintWriter.java:89)
+	at java.io.PrintWriter.write(java.base@10.0.2/Unknown Source)
+	at java.io.PrintWriter.print(java.base@10.0.2/Unknown Source)
+	at decaf.utils.IndentPrintWriter.writeIndent(IndentPrintWriter.java:70)
+	at decaf.utils.IndentPrintWriter.write(IndentPrintWriter.java:88)
+	at java.io.PrintWriter.write(java.base@10.0.2/Unknown Source)
+	at java.io.PrintWriter.print(java.base@10.0.2/Unknown Source)
+	at java.io.PrintWriter.println(java.base@10.0.2/Unknown Source)
+	- locked <0x00000000c5396240> (a java.io.OutputStreamWriter)
+	at decaf.tree.Tree$Block.printTo(Tree.java:682)
+	at decaf.tree.Tree$MethodDef.printTo(Tree.java:617)
+	at decaf.tree.Tree$ClassDef.printTo(Tree.java:574)
+	at decaf.tree.Tree$TopLevel.printTo(Tree.java:540)
+	at decaf.Driver.compile(Driver.java:60)
+	at decaf.Driver.main(Driver.java:70)
+
+"Reference Handler" #2 daemon prio=10 os_prio=2 tid=0x00000230ccb29800 nid=0xcdc waiting on condition  [0x000000c6ceeff000]
+   java.lang.Thread.State: RUNNABLE
+	at java.lang.ref.Reference.waitForReferencePendingList(java.base@10.0.2/Native Method)
+	at java.lang.ref.Reference.processPendingReferences(java.base@10.0.2/Unknown Source)
+	at java.lang.ref.Reference.access$000(java.base@10.0.2/Unknown Source)
+	at java.lang.ref.Reference$ReferenceHandler.run(java.base@10.0.2/Unknown Source)
+
+"Finalizer" #3 daemon prio=8 os_prio=1 tid=0x00000230ccb36000 nid=0xff0 in Object.wait()  [0x000000c6cefff000]
+   java.lang.Thread.State: WAITING (on object monitor)
+	at java.lang.Object.wait(java.base@10.0.2/Native Method)
+	- waiting on <0x00000000c5709410> (a java.lang.ref.ReferenceQueue$Lock)
+	at java.lang.ref.ReferenceQueue.remove(java.base@10.0.2/Unknown Source)
+	- waiting to re-lock in wait() <0x00000000c5709410> (a java.lang.ref.ReferenceQueue$Lock)
+	at java.lang.ref.ReferenceQueue.remove(java.base@10.0.2/Unknown Source)
+	at java.lang.ref.Finalizer$FinalizerThread.run(java.base@10.0.2/Unknown Source)
+
+"Signal Dispatcher" #4 daemon prio=9 os_prio=2 tid=0x00000230ccb8d800 nid=0x2598 waiting on condition  [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+
+"Attach Listener" #5 daemon prio=5 os_prio=2 tid=0x00000230ccb90800 nid=0xab0 runnable  [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+
+"C2 CompilerThread0" #6 daemon prio=9 os_prio=2 tid=0x00000230ccb91800 nid=0x94c waiting on condition  [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+   No compile task
+
+"C1 CompilerThread1" #7 daemon prio=9 os_prio=2 tid=0x00000230ccbf4800 nid=0xb60 waiting on condition  [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+   No compile task
+
+"Sweeper thread" #8 daemon prio=9 os_prio=2 tid=0x00000230ccbf8000 nid=0xa50 runnable  [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+
+"Service Thread" #9 daemon prio=9 os_prio=0 tid=0x00000230ccd67800 nid=0x1808 runnable  [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+
+"Common-Cleaner" #10 daemon prio=8 os_prio=1 tid=0x00000230ccd11000 nid=0x26c4 in Object.wait()  [0x000000c6cf6ff000]
+   java.lang.Thread.State: TIMED_WAITING (on object monitor)
+	at java.lang.Object.wait(java.base@10.0.2/Native Method)
+	- waiting on <0x00000000c562dd18> (a java.lang.ref.ReferenceQueue$Lock)
+	at java.lang.ref.ReferenceQueue.remove(java.base@10.0.2/Unknown Source)
+	- waiting to re-lock in wait() <0x00000000c562dd18> (a java.lang.ref.ReferenceQueue$Lock)
+	at jdk.internal.ref.CleanerImpl.run(java.base@10.0.2/Unknown Source)
+	at java.lang.Thread.run(java.base@10.0.2/Unknown Source)
+	at jdk.internal.misc.InnocuousThread.run(java.base@10.0.2/Unknown Source)
+
+"VM Thread" os_prio=2 tid=0x00000230b178e800 nid=0x1f88 runnable  
+
+"GC Thread#0" os_prio=2 tid=0x00000230b16bd000 nid=0x2680 runnable  
+
+"GC Thread#1" os_prio=2 tid=0x00000230b16c1800 nid=0x8f0 runnable  
+
+"G1 Main Marker" os_prio=2 tid=0x00000230b16f8800 nid=0x1e40 runnable  
+
+"G1 Conc#0" os_prio=2 tid=0x00000230b16fc000 nid=0x938 runnable  
+
+"G1 Refine#0" os_prio=2 tid=0x00000230b1742000 nid=0x1a8 runnable  
+
+"G1 Refine#1" os_prio=2 tid=0x00000230b1747800 nid=0x168c runnable  
+
+"G1 Young RemSet Sampling" os_prio=2 tid=0x00000230b1749800 nid=0x1cc8 runnable  
+"VM Periodic Task Thread" os_prio=2 tid=0x00000230ccd13800 nid=0x1660 waiting on condition  
+
+JNI global references: 6
+
+Heap
+ garbage-first heap   total 65536K, used 5120K [0x00000000c1800000, 0x0000000100000000)
+  region size 1024K, 6 young (6144K), 0 survivors (0K)
+ Metaspace       used 6071K, capacity 6235K, committed 6272K, reserved 1056768K
+  class space    used 556K, capacity 615K, committed 640K, reserved 1048576K
+
+program
+    class Main <empty>
+        vardef i inttype
+        static func main voidtype
+            formals
+            stmtblock
+                vardef h classtype Hoo
+                assign
+                    varref i
+                    intconst 4
+                assign
+                    varref h
+                    newobj Goo
+                call printNumbers
+                    varref h
+                    varref i
+                print
+                    instanceof
+                        varref h
+                        Goo
+                vardef g classtype Goo
+                assign
+                    varref g
+                    classcast
+                        Goo
+                        varref h
+                call printNumbers
+                    varref g
+                    varref i
+    class Hoo <empty>
+        func printNumbers inttype
+            formals
+                vardef n inttype
+            stmtblock
+                vardef i inttype
+                if
+                    les
+                        intconst 10
+                        varref n
+                    stmtblock
+                        assign
+                            varref n
+                            intconst 10
+                assign
+                    varref i
+                    intconst 0
+                while
+                    les
+                        varref i
+                        varref n
+                    stmtblock
+                        print
+                            varref i
+                        assign
+                            varref i
+                            mul
+                                varref i
+                                intconst 2
+                print
+                    stringconst "\n"
+                return
+                    varref i
+    class Goo Hoo
+        func printNumbers inttype
+            formals
+                vardef n inttype
+            stmtblock
+                print
+                    varref n
+                return
+                    intconst 1
