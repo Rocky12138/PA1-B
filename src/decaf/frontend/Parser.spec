@@ -20,7 +20,7 @@ LESS_EQUAL   GREATER_EQUAL  EQUAL   NOT_EQUAL
 '+'  '-'  '*'  '/'  '%'  '='  '>'  '<'  '.'
 ','  ';'  '!'  '('  ')'  '['  ']'  '{'  '}' ':'
 SCOPY  SEALED  GUARDOR  VAR  ARRAYINIT
-ARRAYCONCAT IN  DEFAULT  FOREACH
+ARRAYCONCAT IN  DEFAULT  FOREACH LBRA RBRA
 
 %%
 
@@ -246,7 +246,37 @@ Stmt            :   VariableDef
 						$$.loc = $1.loc;
 						$$.stmt = $2.stmt;	
 					}
+				|	ForeachStmt
+					{
+						$$.stmt = $1.stmt;	
+					}
                 ;
+
+ForeachStmt		:	FOREACH '(' BoundVariable IN Expr BoolExprForeach ')' Stmt
+			 		{
+						$$.stmt = new Tree.ForeachLoop($3.stmt, $5.expr, $6.expr, $8.stmt, $1.loc);
+					}
+			 	;
+
+BoolExprForeach	:	WHILE Expr
+					{
+						$$.expr = $2.expr;
+					}
+				|	/* empty */
+					{
+						$$ = new SemValue();
+					}
+				;
+
+BoundVariable	:	VAR IDENTIFIER
+			  		{
+						$$.stmt = new Tree.Var($2.ident, $2.loc);
+					}
+				|	Variable
+					{
+						$$.stmt = $1.vdef;
+					}
+			  	;
 
 OCStmt			:	SCOPY '(' IDENTIFIER ',' Expr ')'
 		 			{
@@ -688,13 +718,18 @@ Expr9           :   Oper9 Expr10
                     }
                 ;
 
-Expr10           :   Expr11 ExprT10
+Expr10           :  Expr11 ExprT10
                     {
                         $$.expr = $1.expr;
                         $$.loc = $1.loc;
                         if ($2.vec != null) {
                             for (SemValue v : $2.vec) {
                                 if (v.expr != null) {
+									if (v.expr1 != null) {
+										//default index
+										$$.expr = new Tree.Ternary(Tree.DYNACCESS, $$.expr, v.expr, v.expr1, $$.loc);
+										continue;
+									}
                                     $$.expr = new Tree.Indexed($$.expr, v.expr, $$.loc);
                                 } else if (v.elist != null) {
                                     $$.expr = new Tree.CallExpr($$.expr, v.ident, v.elist, v.loc);
@@ -708,16 +743,20 @@ Expr10           :   Expr11 ExprT10
                     }
                 ;
 
-ExprT10          :   '[' RangeExpr ']' ExprT10
-                    {
-                        SemValue sem = new SemValue();
-                        sem.expr = $2.expr;
-                        $$.vec = new Vector<SemValue>();
-                        $$.vec.add(sem);
-                        if ($4.vec != null) {
-                            $$.vec.addAll($4.vec);
-                        }
-                    }
+ExprT10         :   '[' AfterBracket
+					{
+						SemValue sem = new SemValue();
+						sem.expr = $2.expr;
+						if ($2.expr1 != null) {
+							//has default clause
+							sem.expr1 = $2.expr1;
+						}
+						$$.vec = new Vector<SemValue>();
+						$$.vec.add(sem);
+						if ($2.vec != null) {
+							$$.vec.addAll($2.vec);	
+						}
+					}
                 |   '.' IDENTIFIER AfterIdentExpr ExprT10
                     {
                         SemValue sem = new SemValue();
@@ -733,23 +772,44 @@ ExprT10          :   '[' RangeExpr ']' ExprT10
                 |   /* empty */
                 ;
 
-RangeExpr		: 	Expr HalfExpr
+AfterBracket		: 	Expr AfterExpr
 					{
-						if ($2.expr == null) {
-							$$.expr = $1.expr;		
+						if ($2.expr != null) {
+							$$.expr = new Tree.Binary(Tree.RANGE, $1.expr, $2.expr, $2.loc);
+						} else if ($2.expr1 != null) {
+							//default next
+							$$.expr = $1.expr;
+							$$.expr1 = $2.expr1;
 						} else {
-							$$.expr = new Tree.Binary(Tree.RANGE, $1.expr, $2.expr, $2.loc);	
+							$$.expr = $1.expr;	
 						}
+						$$.vec = $2.vec;
 					}
 				;
 
-HalfExpr		:	':' Expr
+AfterExpr		:	':' Expr ']' ExprT10
 					{
 						$$.loc = $1.loc;
-						$$.expr = $2.expr;	
+						$$.vec = $4.vec;
+						$$.expr = $2.expr;
 					}
-				|	/* empty */
+				|	']' AfterReverseBracket
+					{
+						$$.vec = $2.vec;
+						$$.expr1 = $2.expr1;
+					}
 				;
+
+AfterReverseBracket	:	ExprT10
+						{
+							$$.vec = $1.vec;	
+						}
+					|	DEFAULT Expr11 ExprT10
+						{
+							$$.expr1 = $2.expr;
+							$$.vec = $3.vec;
+						}
+					;
 
 AfterIdentExpr  :   '(' Actuals ')'
                     {
@@ -798,7 +858,21 @@ Expr11           :  Constant
                             $$.expr = new Tree.Ident(null, $1.ident, $1.loc);
                         }
                     }
+				|	LBRA Expr FOR IDENTIFIER IN Expr BoolExprForComp RBRA
+					{
+						$$.expr = new Tree.ArrayComp($2.expr, $4.ident, $6.expr, $7.expr, $1.loc);
+					}
                 ;
+
+BoolExprForComp	:	IF Expr
+		  			{
+						$$.expr = $2.expr;
+					}
+				|	/* empty */
+					{
+						$$ = new SemValue();
+					}
+		  		;
 
 AfterNewExpr    :   IDENTIFIER '(' ')'
                     {

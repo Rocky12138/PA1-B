@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.ArrayList;
 
 public class Parser extends Table {
 	/**
@@ -86,7 +87,6 @@ public class Parser extends Table {
      * @return the parsed value of `symbol` if parsing succeeded, otherwise `null`.
      */
     private SemValue parse(int symbol, Set<Integer> follow) {
-		//System.out.print("checking for "+name(symbol));
 
 		//establish EndSym set
 		Set<Integer> endSym = new HashSet<Integer>();
@@ -107,9 +107,6 @@ public class Parser extends Table {
 		}	//while out, lookahead is in begin+end set
 
 		while (result!=null) {	//if lookahead is in beginSet
-			/*System.out.print(name(symbol)+"->");
-			printSymbolList(result.getValue());
-			System.out.println();*/
 
 			int actionId = result.getKey(); // get user-defined action
 
@@ -208,8 +205,4 @@ public class Parser extends Table {
      * Diagnose function. (For debugging)
      * Implement this by yourself on demand.
      */
-    public void diagnose() {
-
-    }
-
 }
